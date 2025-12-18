@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Frases de Recusa - Gupy</title>
+    
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2300A3E0'/%3E%3Cpath d='M50 20v15M50 80v-15M20 50h15M80 50h-15M29 29l11 11M71 29l-11 11M29 71l11-11M71 71l-11-11' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body { font-family: 'Nunito', sans-serif; background-color: #f3f4f6; }
+        .nav-item.active { background-color: #1e40af; color: white; }
+        .nav-item { transition: all 0.2s; border-radius: 0.5rem; }
+        .nav-item:hover { background-color: #334155; color: white; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .header-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none; appearance: none;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .modal-content { animation: fadeIn 0.2s ease-out forwards; }
+    </style>
+</head>
+<body class="h-screen overflow-hidden text-gray-800 bg-gray-50">
+
+    <div id="login-flow" class="flex h-screen w-full items-center justify-center bg-gradient-to-br from-blue-900 to-slate-900">
+        <div class="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md animate-fade-in-up">
+            <div class="text-center mb-8">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fas fa-quote-right text-3xl text-blue-600"></i></div>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Gupy Frases</h1><p class="text-base text-gray-500 mt-2 font-medium">Sistema Interno de Gestão</p>
+            </div>
+            <form onsubmit="event.preventDefault(); fazerLogin();">
+                <div class="mb-4"><label class="block text-sm font-bold text-gray-600 uppercase mb-1 ml-1">Usuário</label><input type="text" id="login-user" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50" required></div>
+                <div class="mb-6"><label class="block text-sm font-bold text-gray-600 uppercase mb-1 ml-1">Senha</label><input type="password" id="login-pass" class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50" required></div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg transform transition hover:-translate-y-1 text-lg">Acessar Sistema</button>
+            </form>
+            <div class="mt-8 text-center border-t border-gray-100 pt-4">
+                <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Desenvolvido por Pedro Gabriel</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="first-access-modal" class="hidden fixed inset-0 bg-slate-900 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center modal-content">
+            <div class="w-16 h-16 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"><i class="fas fa-key"></i></div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Atualize sua Senha</h2>
+            <p class="text-sm text-gray-500 mb-6">Primeiro acesso detectado. Defina uma nova senha.</p>
+            <input type="password" id="new-password" placeholder="Nova Senha" class="w-full p-3 border rounded-xl mb-4 focus:ring-2 focus:ring-yellow-400 outline-none">
+            <input type="password" id="confirm-password" placeholder="Confirmar Nova Senha" class="w-full p-3 border rounded-xl mb-6 focus:ring-2 focus:ring-yellow-400 outline-none">
+            <button onclick="atualizarSenhaPrimeiroAcesso()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 rounded-xl transition">Salvar e Entrar</button>
+        </div>
+    </div>
+
+    <div id="modal-frase" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-all">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden modal-content relative">
+            <div class="bg-gray-50 px-8 py-5 border-b border-gray-100 flex justify-between items-center">
+                <h3 id="modal-title" class="text-xl font-extrabold text-gray-800 flex items-center gap-2"></h3>
+                <button onclick="fecharModalFrase()" class="text-gray-400 hover:text-red-500 transition text-xl"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-8">
+                <input type="hidden" id="id-frase">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div><label class="text-xs font-extrabold text-gray-500 uppercase mb-1 block ml-1">Empresa</label><input id="inp-empresa" type="text" placeholder="Ex: Gupy" class="w-full p-3 border rounded-xl text-sm font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition"></div>
+                    <div><label class="text-xs font-extrabold text-gray-500 uppercase mb-1 block ml-1">Motivo</label><input id="inp-motivo" type="text" placeholder="Ex: Feedback" class="w-full p-3 border rounded-xl text-sm font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition"></div>
+                    <div><label class="text-xs font-extrabold text-gray-500 uppercase mb-1 block ml-1">Documento</label><input id="inp-doc" type="text" placeholder="Ex: Foto/RG" class="w-full p-3 border rounded-xl text-sm font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition"></div>
+                </div>
+                <div class="mb-2"><label class="text-xs font-extrabold text-gray-500 uppercase mb-1 block ml-1">Conteúdo da Frase</label><textarea id="inp-conteudo" rows="5" class="w-full p-4 border rounded-xl text-lg text-gray-700 font-medium bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition" placeholder="Digite o texto aqui..."></textarea></div>
+            </div>
+            <div class="bg-gray-50 px-8 py-5 border-t border-gray-100 flex justify-end gap-3">
+                <button onclick="fecharModalFrase()" class="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-200 transition">Cancelar</button>
+                <button onclick="salvarFrase()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition transform active:scale-95">Salvar Registro</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-usuario" class="hidden fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 transition-all">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden modal-content relative">
+            <div class="bg-gray-50 px-8 py-5 border-b border-gray-100 flex justify-between items-center">
+                <h3 id="modal-user-title" class="text-xl font-extrabold text-gray-800 flex items-center gap-2"></h3>
+                <button onclick="fecharModalUsuario()" class="text-gray-400 hover:text-red-500 transition text-xl"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-8 space-y-4">
+                <input type="hidden" id="id-user-edit">
+                <div><label class="text-xs font-extrabold text-gray-500 uppercase mb-1 block ml-1">Login</label><input id="user-novo" type="text" placeholder="Ex: maria.silva" class="w-full p-3 border rounded-xl text-sm font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition"></div>
+                <div><label class="text-xs font-extrabold text-gray-500 uppercase mb-1 block ml-1">Senha</label><input id="pass-novo" type="text" placeholder="Senha Inicial" class="w-full p-3 border rounded-xl text-sm font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition"></div>
+                <div><label class="text-xs font-extrabold text-gray-500 uppercase mb-1 block ml-1">Perfil</label><select id="perfil-novo" class="w-full p-3 border rounded-xl text-sm font-semibold bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 outline-none transition cursor-pointer"><option value="user">👤 Colaborador</option><option value="admin">🔑 Administrador</option></select></div>
+            </div>
+            <div class="bg-gray-50 px-8 py-5 border-t border-gray-100 flex justify-end gap-3">
+                <button onclick="fecharModalUsuario()" class="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-200 transition">Cancelar</button>
+                <button onclick="salvarUsuario()" id="btn-salvar-user" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition transform active:scale-95">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-flow" class="hidden flex flex-col h-screen">
+        
+        <nav class="bg-slate-900 text-slate-300 h-16 flex-shrink-0 shadow-lg z-50">
+            <div class="container mx-auto px-6 h-full flex items-center justify-between">
+                <div class="flex items-center gap-8">
+                    <div class="flex items-center gap-2 text-white"><i class="fas fa-quote-right text-blue-500 text-xl"></i><span class="font-extrabold text-xl tracking-tight">Gupy<span class="text-blue-500">Frases</span></span></div>
+                    <div class="hidden md:flex items-center gap-2">
+                        <button onclick="navegar('biblioteca')" id="menu-biblioteca" class="nav-item px-4 py-2 text-sm font-bold"><i class="fas fa-book-open mr-2"></i>Biblioteca</button>
+                        <button onclick="navegar('gestao')" id="menu-gestao" class="nav-item px-4 py-2 text-sm font-bold"><i class="fas fa-pen-to-square mr-2"></i>Gestão</button>
+                        <div id="admin-menu-items" class="hidden flex gap-2 border-l border-slate-700 pl-2 ml-2">
+                            <button onclick="navegar('logs')" id="menu-logs" class="nav-item px-4 py-2 text-sm font-bold"><i class="fas fa-history mr-2"></i>Logs</button>
+                            <button onclick="navegar('equipe')" id="menu-equipe" class="nav-item px-4 py-2 text-sm font-bold"><i class="fas fa-users-cog mr-2"></i>Equipe</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 border-l border-slate-700 pl-6">
+                    <div class="text-right hidden sm:block"><p id="user-name-display" class="text-sm font-bold text-white leading-none">Usuário</p><p id="user-role-display" class="text-[10px] text-blue-400 mt-1 font-extrabold uppercase">Carregando...</p></div>
+                    <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-md border-2 border-slate-800 text-lg"><span id="avatar-initial">U</span></div>
+                    <button onclick="logout()" class="text-slate-400 hover:text-red-400 transition ml-2" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </nav>
+
+        <header class="bg-white border-b border-gray-200 py-4 flex-shrink-0 z-40 shadow-sm">
+            <div class="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <h2 id="page-title" class="text-2xl font-extrabold text-gray-800 flex items-center gap-3 whitespace-nowrap hidden md:flex min-w-[200px]"></h2>
+                <div class="flex flex-1 w-full items-center justify-end gap-4">
+                    <div class="relative w-full max-w-xl group">
+                        <input type="text" id="global-search" onkeyup="realizarBuscaGlobal()" placeholder="🔎 Pesquisar nesta aba..." 
+                            class="w-full pl-12 pr-4 py-3 rounded-full bg-white border-2 border-blue-400 shadow-xl shadow-blue-100 focus:border-blue-600 focus:ring-4 focus:ring-blue-200 text-gray-700 placeholder-gray-400 font-semibold text-sm transition-all duration-300 outline-none">
+                        <i class="fas fa-search absolute left-4 top-3.5 text-blue-600 text-xl group-focus-within:scale-110 transition-transform"></i>
+                    </div>
+                    <div id="header-filters" class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+                        <select id="filtro-empresa" onchange="aplicarFiltros('select')" class="header-select py-2 pl-3 pr-8 rounded-xl border border-gray-200 bg-gray-50 text-sm font-bold text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none cursor-pointer min-w-[120px] hover:bg-white transition"><option value="">🏢 Empresa</option></select>
+                        <select id="filtro-motivo" onchange="aplicarFiltros('select')" class="header-select py-2 pl-3 pr-8 rounded-xl border border-gray-200 bg-gray-50 text-sm font-bold text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none cursor-pointer min-w-[120px] hover:bg-white transition"><option value="">🎯 Motivo</option></select>
+                        <select id="filtro-doc" onchange="aplicarFiltros('select')" class="header-select py-2 pl-3 pr-8 rounded-xl border border-gray-200 bg-gray-50 text-sm font-bold text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none cursor-pointer min-w-[110px] hover:bg-white transition"><option value="">📄 Doc</option></select>
+                        <button onclick="limparFiltros()" class="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition font-bold" title="Limpar"><i class="fas fa-times"></i></button>
+                    </div>
+                    <button id="btn-add-global" onclick="abrirModalFrase()" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 transition transform active:scale-95 items-center gap-2 whitespace-nowrap"><i class="fas fa-plus"></i> <span class="hidden lg:inline">Adicionar Frase</span></button>
+                    <button id="btn-add-member" onclick="abrirModalUsuario()" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-blue-200 transition transform active:scale-95 items-center gap-2 whitespace-nowrap"><i class="fas fa-user-plus"></i> <span class="hidden lg:inline">Novo Membro</span></button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto bg-gray-50">
+            <div class="container mx-auto px-6 py-8 flex flex-col min-h-full">
+                
+                <section id="view-biblioteca" class="view-section flex-grow">
+                    <div class="flex justify-between items-center mb-4"><div class="h-1.5 w-12 bg-blue-500 rounded-full"></div><span id="contador-resultados" class="text-xs font-extrabold text-gray-400 uppercase tracking-wider">Carregando...</span></div>
+                    <div id="grid-frases" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full"></div>
+                </section>
+
+                <section id="view-gestao" class="view-section hidden flex-grow">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden max-w-full mx-auto">
+                        <div class="bg-gray-50 px-8 py-5 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="font-bold text-gray-700 text-lg flex items-center gap-2" id="titulo-tabela-gestao"><i class="fas fa-table text-blue-400"></i> Registros Recentes</h3>
+                            <div class="flex items-center gap-3">
+                                <button onclick="verTodasGestao()" class="text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-blue-600 px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm uppercase tracking-wide"><i class="fas fa-list mr-1"></i> Ver Todas</button>
+                                <button onclick="carregarFrases()" class="text-blue-600 text-sm hover:underline font-bold flex items-center"><i class="fas fa-sync mr-1"></i> Atualizar</button>
+                            </div>
+                        </div>
+                        <table class="w-full text-left"><thead class="bg-gray-100 text-xs text-gray-500 uppercase font-extrabold border-b border-gray-200"><tr><th class="px-8 py-4">ID</th><th class="px-6 py-4">Empresa / Motivo</th><th class="px-6 py-4">Conteúdo (Resumo)</th><th class="px-8 py-4 text-right">Ações</th></tr></thead><tbody id="lista-gestao" class="divide-y divide-gray-100 text-sm"></tbody></table>
+                        <div id="footer-tabela-gestao" class="p-4 text-center text-xs font-bold text-gray-400 bg-gray-50 border-t border-gray-100 italic">Mostrando os 5 últimos adicionados.</div>
+                    </div>
+                </section>
+
+                <section id="view-logs" class="view-section hidden flex-grow">
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden max-w-6xl mx-auto">
+                        <div class="bg-gray-50 px-8 py-5 border-b border-gray-200 flex justify-between items-center">
+                            <h3 id="titulo-tabela-logs" class="font-bold text-gray-700 text-lg flex items-center gap-2"><i class="fas fa-history text-blue-400"></i> Atividades Recentes</h3>
+                            <div class="flex items-center gap-3">
+                                <button onclick="verTodosLogs()" class="text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:text-blue-600 px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm uppercase tracking-wide"><i class="fas fa-list mr-1"></i> Ver Histórico</button>
+                                <button onclick="carregarLogs()" class="text-blue-600 text-sm hover:underline font-bold uppercase">Atualizar</button>
+                            </div>
+                        </div>
+                        <table class="w-full text-left"><thead class="bg-gray-100 text-xs text-gray-500 uppercase font-extrabold border-b border-gray-200"><tr><th class="px-8 py-4">Data</th><th class="px-6 py-4">Usuário</th><th class="px-6 py-4">Ação</th><th class="px-6 py-4">Detalhe</th></tr></thead><tbody id="lista-logs" class="divide-y divide-gray-100 text-sm font-medium text-gray-600"></tbody></table>
+                        <div id="footer-tabela-logs" class="p-4 text-center text-xs font-bold text-gray-400 bg-gray-50 border-t border-gray-100 italic">Mostrando as 5 últimas atividades.</div>
+                    </div>
+                </section>
+                
+                <section id="view-equipe" class="view-section hidden flex-grow">
+                    <div class="grid grid-cols-1 lg:grid-cols-1 gap-8 max-w-6xl mx-auto">
+                        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div class="bg-gray-50 px-8 py-5 border-b border-gray-200 flex justify-between items-center">
+                                <h3 class="font-bold text-gray-700 text-lg flex items-center gap-2"><i class="fas fa-users text-blue-400"></i> Membros Ativos</h3>
+                                <button onclick="carregarEquipe()" class="text-blue-600 text-sm hover:underline font-bold uppercase">Atualizar</button>
+                            </div>
+                            <table class="w-full text-left"><thead class="bg-gray-100 text-xs text-gray-500 uppercase font-extrabold border-b border-gray-200"><tr><th class="px-8 py-4">Usuário</th><th class="px-6 py-4">Perfil</th><th class="px-8 py-4 text-right">Ações</th></tr></thead><tbody id="lista-equipe" class="divide-y divide-gray-100 text-sm"></tbody></table>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between hover:shadow-md transition">
+                                <div><div class="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 text-xl mb-4"><i class="fas fa-cloud-download-alt"></i></div><h4 class="font-bold text-gray-800 text-lg">Backup de Segurança</h4><p class="text-sm text-gray-500 mt-1">Baixe uma cópia completa dos dados.</p></div>
+                                <button onclick="baixarBackup()" class="mt-6 w-full bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 font-bold py-3 rounded-xl transition">Baixar Dados</button>
+                            </div>
+                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col justify-between hover:shadow-md transition">
+                                <div><div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 text-xl mb-4"><i class="fas fa-file-import"></i></div><h4 class="font-bold text-gray-800 text-lg">Restaurar Backup</h4><p class="text-sm text-gray-500 mt-1">Importe dados de um arquivo JSON.</p></div>
+                                <input type="file" id="input-backup" class="hidden" accept=".json" onchange="importarBackup(this)">
+                                <button onclick="document.getElementById('input-backup').click()" class="mt-6 w-full bg-white border border-green-200 text-green-600 hover:bg-green-50 font-bold py-3 rounded-xl transition">Selecionar Arquivo</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <footer class="mt-12 border-t border-gray-200 pt-6 text-center">
+                    <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Desenvolvido por Pedro Gabriel</p>
+                </footer>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://urmwvabkikftsefztadb.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVybXd2YWJraWtmdHNlZnp0YWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNjU1NjQsImV4cCI6MjA4MDc0MTU2NH0.SXR6EG3fIE4Ya5ncUec9U2as1B7iykWZhZWN1V5b--E';
+        // Variável com underscore para evitar conflito com a lib
+        const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let usuarioLogado = null; let cacheFrases = []; let cacheLogs = []; let cacheEquipe = []; let debounceTimer; let abaAtiva = 'biblioteca';
+
+        window.onload = function() { const sessao = localStorage.getItem('gupy_session'); if(sessao) { usuarioLogado = JSON.parse(sessao); verificarPrimeiroAcesso(); } else { document.getElementById('login-flow').classList.remove('hidden'); } };
+        
+        async function fazerLogin() {
+            const u = document.getElementById('login-user').value;
+            const p = document.getElementById('login-pass').value;
+
+            try {
+                const { data, error } = await _supabase.from('usuarios').select('*').eq('username', u).eq('senha', p);
+
+                if (error) {
+                    Swal.fire('Erro no Banco de Dados', 'Detalhe: ' + error.message, 'error');
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    usuarioLogado = data[0];
+                    localStorage.setItem('gupy_session', JSON.stringify(usuarioLogado));
+                    verificarPrimeiroAcesso();
+                } else {
+                    Swal.fire('Acesso Negado', 'Usuário não encontrado ou senha incorreta.', 'warning');
+                }
+            } catch (err) {
+                Swal.fire('Erro Crítico', 'Verifique o Console (F12) para detalhes.', 'error');
+            }
+        }
+
+        function verificarPrimeiroAcesso() { if (usuarioLogado.primeiro_acesso === true) { document.getElementById('login-flow').classList.add('hidden'); document.getElementById('app-flow').classList.add('hidden'); document.getElementById('first-access-modal').classList.remove('hidden'); } else { entrarNoSistema(); } }
+        async function atualizarSenhaPrimeiroAcesso() { const s1 = document.getElementById('new-password').value; const s2 = document.getElementById('confirm-password').value; if(s1.length < 4) return Swal.fire('Atenção', 'Senha curta', 'warning'); if(s1 !== s2) return Swal.fire('Erro', 'Senhas não coincidem', 'error'); const { error } = await _supabase.from('usuarios').update({ senha: s1, primeiro_acesso: false }).eq('id', usuarioLogado.id); if(!error) { usuarioLogado.primeiro_acesso = false; localStorage.setItem('gupy_session', JSON.stringify(usuarioLogado)); document.getElementById('first-access-modal').classList.add('hidden'); Swal.fire({icon: 'success', title: 'Senha Atualizada!', timer: 1500, showConfirmButton: false}); entrarNoSistema(); } else { Swal.fire('Erro', 'Falha ao atualizar', 'error'); } }
+
+        function entrarNoSistema() { 
+            document.getElementById('login-flow').classList.add('hidden'); document.getElementById('app-flow').classList.remove('hidden'); 
+            document.getElementById('user-name-display').innerText = usuarioLogado.username; document.getElementById('avatar-initial').innerText = usuarioLogado.username.charAt(0).toUpperCase(); 
+            const roleLabel = document.getElementById('user-role-display'); const adminMenu = document.getElementById('admin-menu-items');
+            if (usuarioLogado.perfil === 'admin') { roleLabel.innerText = 'Administrador'; roleLabel.classList.add('text-yellow-400'); adminMenu.classList.remove('hidden'); adminMenu.classList.add('flex'); } 
+            else { roleLabel.innerText = 'Colaborador'; roleLabel.classList.add('text-blue-300'); adminMenu.classList.add('hidden'); adminMenu.classList.remove('flex'); }
+            navegar('biblioteca'); registrarLog('LOGIN', 'Acesso realizado');
+        }
+        function logout() { localStorage.removeItem('gupy_session'); window.location.reload(); }
+        async function registrarLog(acao, detalhe) { if(!usuarioLogado) return; await _supabase.from('logs').insert([{ usuario: usuarioLogado.username, acao, detalhe }]); }
+
+        function navegar(pagina) {
+            if (usuarioLogado.perfil !== 'admin' && (pagina === 'logs' || pagina === 'equipe')) { pagina = 'biblioteca'; }
+            abaAtiva = pagina; 
+            
+            const filtrosHeader = document.getElementById('header-filters'); const btnAddGlobal = document.getElementById('btn-add-global'); const btnAddMember = document.getElementById('btn-add-member'); const pageTitle = document.getElementById('page-title');
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden')); document.getElementById(`view-${pagina}`).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active', 'bg-blue-800', 'text-white')); const menuAtivo = document.getElementById(`menu-${pagina}`); if(menuAtivo) menuAtivo.classList.add('active');
+
+            btnAddGlobal.classList.add('hidden'); btnAddMember.classList.add('hidden'); filtrosHeader.classList.add('hidden'); filtrosHeader.classList.remove('flex');
+            document.getElementById('global-search').value = ''; 
+
+            if (pagina === 'biblioteca') { 
+                filtrosHeader.classList.remove('hidden'); filtrosHeader.classList.add('flex'); 
+                pageTitle.innerHTML = '<i class="fas fa-folder-open text-blue-500 opacity-50"></i> Biblioteca'; 
+                carregarFrases();
+            } else if (pagina === 'gestao') {
+                btnAddGlobal.classList.remove('hidden'); btnAddGlobal.classList.add('flex'); 
+                pageTitle.innerHTML = '<i class="fas fa-pen-to-square text-blue-500 opacity-50"></i> Gestão de Conteúdo'; 
+                carregarFrases();
+            } else if (pagina === 'equipe') {
+                btnAddMember.classList.remove('hidden'); btnAddMember.classList.add('flex');
+                pageTitle.innerHTML = '<i class="fas fa-users-cog text-gray-400"></i> Gestão de Equipe';
+                carregarEquipe();
+            } else {
+                pageTitle.innerHTML = '<i class="fas fa-history text-gray-400"></i> Logs de Auditoria';
+                carregarLogs();
+            }
+        }
+
+        function debounceBusca() { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => { realizarBuscaGlobal(); }, 300); }
+        
+        function realizarBuscaGlobal() {
+            const termo = document.getElementById('global-search').value;
+            if (abaAtiva === 'biblioteca' || abaAtiva === 'gestao') {
+                aplicarFiltros('busca');
+            } else if (abaAtiva === 'logs') {
+                filtrarLogs(termo);
+            } else if (abaAtiva === 'equipe') {
+                filtrarEquipe(termo);
+            }
+        }
+
+        async function carregarFrases() { const { data: df } = await _supabase.from('frases').select('*').order('id', {ascending: false}); const { data: dl } = await _supabase.from('logs').select('detalhe').eq('usuario', usuarioLogado.username).eq('acao', 'COPIAR_RANK'); const mu = {}; if(dl) { dl.forEach(l => { mu[l.detalhe] = (mu[l.detalhe] || 0) + 1; }); } cacheFrases = (df || []).map(f => ({ ...f, meus_usos: mu[f.id] || 0 })); cacheFrases.sort((a, b) => b.meus_usos - a.meus_usos); aplicarFiltros('inicio'); }
+        function normalizarTextoBusca(txt) { if(!txt) return ""; return txt.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); }
+        function formatarTextoBonito(t, tipo) { if (!t) return ""; let l = t.trim().replace(/\s+/g, ' '); if (tipo === 'titulo') return l.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); if (tipo === 'frase') return l.charAt(0).toUpperCase() + l.slice(1); return l; }
+        function updateSelectOptions(id, list, key, label) { const sel = document.getElementById(id); const val = sel.value; const unique = [...new Set(list.map(f => f[key]).filter(Boolean))].sort(); sel.innerHTML = `<option value="">${label}</option>`; unique.forEach(v => sel.innerHTML += `<option value="${v}">${v}</option>`); if (unique.includes(val)) sel.value = val; else sel.value = ""; }
+        
+        function aplicarFiltros(origem) {
+            const termo = normalizarTextoBusca(document.getElementById('global-search').value);
+            const ve = document.getElementById('filtro-empresa').value; const vm = document.getElementById('filtro-motivo').value; const vd = document.getElementById('filtro-doc').value;
+            const base = cacheFrases.filter(f => normalizarTextoBusca(f.conteudo+f.empresa+f.motivo+f.documento).includes(termo));
+            const oe = base.filter(f => (vm ? f.motivo === vm : true) && (vd ? f.documento === vd : true));
+            const om = base.filter(f => (ve ? f.empresa === ve : true) && (vd ? f.documento === vd : true));
+            const od = base.filter(f => (ve ? f.empresa === ve : true) && (vm ? f.motivo === vm : true));
+            updateSelectOptions('filtro-empresa', oe, 'empresa', '🏢 Empresa'); updateSelectOptions('filtro-motivo', om, 'motivo', '🎯 Motivo'); updateSelectOptions('filtro-doc', od, 'documento', '📄 Doc');
+            const final = base.filter(f => (ve ? f.empresa === ve : true) && (vm ? f.motivo === vm : true) && (vd ? f.documento === vd : true));
+            const ativos = termo || ve || vm || vd;
+            const biblio = [...final].sort((a, b) => b.meus_usos - a.meus_usos);
+            const exibir = ativos ? biblio : biblio.slice(0, 4);
+            const cnt = document.getElementById('contador-resultados'); if (ativos) { cnt.innerText = `${final.length} ENCONTRADOS`; cnt.className = "text-xs font-bold text-white bg-green-500 px-3 py-1 rounded-full"; } else { cnt.innerText = "TOP 4 (SEU RANKING)"; cnt.className = "text-xs font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full"; }
+            renderizarBiblioteca(exibir); renderizarGestao(final, ativos ? 'busca' : 'padrao');
+        }
+        function limparFiltros() { document.getElementById('global-search').value=''; document.getElementById('filtro-empresa').value=''; document.getElementById('filtro-motivo').value=''; document.getElementById('filtro-doc').value=''; aplicarFiltros(); }
+        function renderizarBiblioteca(lista) { const grid = document.getElementById('grid-frases'); grid.innerHTML = ''; if(!lista.length) { grid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-10 font-bold">Nenhuma frase encontrada.</div>'; return; } lista.forEach(f => { grid.innerHTML += `<div class="h-full flex flex-col bg-white rounded-2xl shadow-sm border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden group"><div class="px-6 pt-6 pb-4 border-b border-gray-100 bg-gray-50 flex justify-between items-start"><div class="flex-1 pr-3"><div class="flex flex-wrap gap-2 mb-2"><span class="bg-blue-100 text-blue-700 text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wide">${f.empresa||'Geral'}</span><span class="bg-white text-gray-500 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wide border border-gray-200"><i class="far fa-file-alt mr-1.5"></i>${f.documento||'Doc'}</span></div><h4 class="font-extrabold text-gray-800 text-lg leading-tight tracking-tight group-hover:text-blue-600 transition-colors">${f.motivo||'Sem título'}</h4></div><button onclick="copiarTexto(${f.id})" class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-lg transition transform hover:-translate-y-0.5 flex items-center gap-2"><i class="far fa-copy text-sm"></i> Copiar</button></div><div class="px-6 py-5 flex-grow bg-white"><p class="text-lg text-gray-700 font-medium whitespace-pre-wrap leading-relaxed">${f.conteudo}</p></div><div class="px-6 py-3 bg-white border-t border-gray-50 text-right"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${f.meus_usos||0} usos (pessoal)</span></div></div>`; }); }
+        function verTodasGestao() { const todas = [...cacheFrases].sort((a, b) => b.id - a.id); renderizarGestao(todas, 'tudo'); }
+        function renderizarGestao(lista, modo) { const tbody = document.getElementById('lista-gestao'); const footer = document.getElementById('footer-tabela-gestao'); const titulo = document.getElementById('titulo-tabela-gestao'); tbody.innerHTML = ''; let visual; if (modo === 'busca') { visual = lista; titulo.innerHTML = `<i class="fas fa-search text-blue-400"></i> Resultados (${visual.length})`; footer.classList.add('hidden'); } else if (modo === 'tudo') { visual = lista; titulo.innerHTML = `<i class="fas fa-list text-blue-400"></i> Todas as Frases (${visual.length})`; footer.classList.add('hidden'); } else { visual = [...cacheFrases].sort((a,b) => b.id - a.id).slice(0, 5); titulo.innerHTML = `<i class="fas fa-clock text-blue-400"></i> Registros Recentes`; footer.classList.remove('hidden'); } visual.forEach(f => { tbody.innerHTML += `<tr class="hover:bg-blue-50 transition group border-b border-gray-50"><td class="px-8 py-4 text-gray-400 font-bold text-xs">#${f.id}</td><td class="px-6 py-4"><div class="font-bold text-gray-700">${f.empresa}</div><div class="text-xs font-bold text-gray-400 uppercase">${f.motivo}</div></td><td class="px-6 py-4 text-gray-500 truncate max-w-xs text-xs font-medium">${f.conteudo.substring(0, 60)}${f.conteudo.length > 60 ? '...' : ''}</td><td class="px-8 py-4 text-right"><button onclick='editarFrase(${JSON.stringify(f)})' class="text-blue-500 hover:bg-blue-100 p-2 rounded-lg mr-1 transition" title="Editar"><i class="fas fa-edit"></i></button><button onclick="deletarFrase(${f.id}, '${f.empresa}')" class="text-red-400 hover:bg-red-100 p-2 rounded-lg transition" title="Excluir"><i class="fas fa-trash"></i></button></td></tr>`; }); }
+        
+        async function carregarLogs() { const { data } = await _supabase.from('logs').select('*').order('id', {ascending: false}); cacheLogs = data || []; renderizarLogs(cacheLogs, 'padrao'); }
+        function filtrarLogs(termo) { const termoNorm = normalizarTextoBusca(termo); const filtrados = cacheLogs.filter(l => normalizarTextoBusca(l.usuario+l.acao+l.detalhe).includes(termoNorm)); renderizarLogs(filtrados, termo ? 'tudo' : 'padrao'); }
+        function verTodosLogs() { renderizarLogs(cacheLogs, 'tudo'); }
+        function renderizarLogs(lista, modo) { 
+            const tbody = document.getElementById('lista-logs'); const footer = document.getElementById('footer-tabela-logs'); const titulo = document.getElementById('titulo-tabela-logs'); tbody.innerHTML = ''; 
+            let visual; if (modo === 'tudo') { visual = lista; titulo.innerHTML = `<i class="fas fa-list-alt text-blue-400"></i> Histórico Completo (${visual.length})`; footer.classList.add('hidden'); } else { visual = lista.slice(0, 5); titulo.innerHTML = `<i class="fas fa-history text-blue-400"></i> Atividades Recentes`; footer.classList.remove('hidden'); } 
+            visual.forEach(l => { tbody.innerHTML += `<tr class="hover:bg-gray-50 border-b border-gray-50"><td class="px-8 py-4 text-xs font-bold text-gray-400">${new Date(l.data_hora).toLocaleString()}</td><td class="px-6 py-4 font-bold text-xs text-blue-600">${l.usuario}</td><td class="px-6 py-4"><span class="badge-${l.acao} px-3 py-1 rounded-full text-[10px] font-extrabold bg-gray-100 text-gray-600 uppercase tracking-wide">${l.acao}</span></td><td class="px-6 py-4 text-xs font-medium text-gray-500">${l.detalhe}</td></tr>`; }); 
+        }
+
+        async function carregarEquipe() { const { data } = await _supabase.from('usuarios').select('*').order('id'); cacheEquipe = data || []; renderizarEquipe(cacheEquipe); }
+        function filtrarEquipe(termo) { const termoNorm = normalizarTextoBusca(termo); const filtrados = cacheEquipe.filter(u => normalizarTextoBusca(u.username).includes(termoNorm)); renderizarEquipe(filtrados); }
+        function renderizarEquipe(lista) { const ul = document.getElementById('lista-equipe'); ul.innerHTML = ''; lista.forEach(u => { const rb = u.perfil === 'admin' ? '<span class="bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Admin</span>' : '<span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase">User</span>'; ul.innerHTML += `<li class="px-8 py-5 flex justify-between items-center hover:bg-gray-50 border-b border-gray-100 last:border-0 transition"><div class="flex items-center gap-4"><div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-600">${u.username.charAt(0).toUpperCase()}</div><div><span class="font-bold text-gray-800 text-sm block">${u.username}</span>${rb}</div></div><div class="flex gap-2"><button onclick="prepararEdicaoUsuario('${u.id}', '${u.username}', '${u.senha}', '${u.perfil}')" class="text-yellow-500 hover:bg-yellow-50 p-2 rounded-lg transition" title="Editar"><i class="fas fa-edit"></i></button><button onclick="deletarUsuario(${u.id}, '${u.username}')" class="text-red-400 hover:bg-red-50 p-2 rounded-lg transition" title="Remover"><i class="fas fa-trash"></i></button></div></li>`; }); }
+
+        const limparTextoComp = (t) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[.,:;!?\-"'()]/g, "").replace(/\s+/g, "");
+        function abrirModalFrase() { document.getElementById('id-frase').value=''; document.querySelectorAll('#modal-frase input, #modal-frase textarea').forEach(el=>el.value=''); document.getElementById('modal-title').innerHTML='<span class="bg-blue-100 text-blue-600 w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fas fa-plus"></i></span><span>Nova Frase</span>'; document.getElementById('modal-frase').classList.remove('hidden'); }
+        function fecharModalFrase() { document.getElementById('modal-frase').classList.add('hidden'); }
+        function editarFrase(f) { document.getElementById('id-frase').value = f.id; document.getElementById('inp-empresa').value = f.empresa; document.getElementById('inp-motivo').value = f.motivo; document.getElementById('inp-doc').value = f.documento; document.getElementById('inp-conteudo').value = f.conteudo; document.getElementById('modal-title').innerHTML = `<span class="bg-yellow-100 text-yellow-600 w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fas fa-pen"></i></span><span>Editando #${f.id}</span>`; document.getElementById('modal-frase').classList.remove('hidden'); }
+        function abrirModalUsuario() { document.getElementById('id-user-edit').value=''; document.getElementById('user-novo').value=''; document.getElementById('pass-novo').value=''; document.getElementById('perfil-novo').value='user'; document.getElementById('modal-user-title').innerHTML='<span class="bg-blue-100 text-blue-600 w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fas fa-user-plus"></i></span><span>Novo Membro</span>'; document.getElementById('btn-salvar-user').innerText='Criar Acesso'; document.getElementById('btn-salvar-user').className='bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition transform active:scale-95'; document.getElementById('modal-usuario').classList.remove('hidden'); }
+        function fecharModalUsuario() { document.getElementById('modal-usuario').classList.add('hidden'); }
+        function prepararEdicaoUsuario(id, n, s, p) { document.getElementById('id-user-edit').value=id; document.getElementById('user-novo').value=n; document.getElementById('pass-novo').value=s; document.getElementById('perfil-novo').value=p||'user'; document.getElementById('modal-user-title').innerHTML='<span class="bg-yellow-100 text-yellow-600 w-8 h-8 flex items-center justify-center rounded-lg text-sm"><i class="fas fa-user-edit"></i></span><span>Editar Usuário</span>'; document.getElementById('btn-salvar-user').innerText='Atualizar Acesso'; document.getElementById('btn-salvar-user').className='bg-yellow-500 hover:bg-yellow-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-yellow-200 transition transform active:scale-95'; document.getElementById('modal-usuario').classList.remove('hidden'); }
+
+        async function salvarFrase() { 
+            const id = document.getElementById('id-frase').value; const dados = { empresa: formatarTextoBonito(document.getElementById('inp-empresa').value, 'titulo'), motivo: formatarTextoBonito(document.getElementById('inp-motivo').value, 'titulo'), documento: formatarTextoBonito(document.getElementById('inp-doc').value, 'titulo'), conteudo: formatarTextoBonito(document.getElementById('inp-conteudo').value, 'frase'), revisado_por: usuarioLogado.username }; 
+            if(!dados.conteudo) return Swal.fire('Erro', 'Conteúdo obrigatório', 'warning');
+            const tn = limparTextoComp(dados.conteudo); const dup = cacheFrases.find(f => { const te = limparTextoComp(f.conteudo); return te === tn && f.id != id; });
+            if(dup) return Swal.fire({icon:'error', title:'Duplicidade', text:`Frase já existe na empresa: ${dup.empresa}`});
+            try { if(id) { await _supabase.from('frases').update(dados).eq('id', id); registrarLog('EDITAR', `Editou frase #${id}`); } else { await _supabase.from('frases').insert([dados]); registrarLog('CRIAR', `Nova frase`); } fecharModalFrase(); carregarFrases(); Swal.fire({icon:'success', title:'Salvo e Padronizado!', timer:1500, showConfirmButton:false}); } catch(e) { Swal.fire('Erro', 'Falha ao salvar', 'error'); } 
+        }
+        async function deletarFrase(id, nome) { if((await Swal.fire({title:'Tem certeza?', icon:'warning', showCancelButton:true})).isConfirmed) { await _supabase.from('frases').delete().eq('id', id); registrarLog('EXCLUIR', `Apagou frase #${id}`); carregarFrases(); } }
+        async function copiarTexto(id) { const f = cacheFrases.find(i => i.id == id); if(f) navigator.clipboard.writeText(f.conteudo).then(async () => { const Toast = Swal.mixin({toast: true, position: 'top-end', showConfirmButton: false, timer: 2000}); Toast.fire({icon: 'success', title: 'Copiado (+1 uso)'}); await _supabase.from('logs').insert([{ usuario: usuarioLogado.username, acao: 'COPIAR_RANK', detalhe: id.toString() }]); f.meus_usos = (f.meus_usos || 0) + 1; const tf = document.getElementById('global-search').value || document.getElementById('filtro-empresa').value; if(!tf) aplicarFiltros('select'); }); }
+        
+        async function salvarUsuario() { const id = document.getElementById('id-user-edit').value; const u = document.getElementById('user-novo').value; const p = document.getElementById('pass-novo').value; const r = document.getElementById('perfil-novo').value; if(!u || !p) return Swal.fire('Erro', 'Preencha tudo', 'warning'); if(id) { await _supabase.from('usuarios').update({ username: u, senha: p, perfil: r }).eq('id', id); registrarLog('EDITAR_USER', `Editou membro: ${u}`); Swal.fire('Sucesso', 'Atualizado', 'success'); } else { await _supabase.from('usuarios').insert([{username: u, senha: p, perfil: r, primeiro_acesso: true}]); registrarLog('CRIAR_USER', `Criou: ${u}`); Swal.fire('Sucesso', 'Criado', 'success'); } fecharModalUsuario(); carregarEquipe(); }
+        async function deletarUsuario(id, n) { if(id===usuarioLogado.id) return Swal.fire('Erro', 'Não pode se auto-excluir', 'error'); if((await Swal.fire({title:'Remover?', showCancelButton:true})).isConfirmed) { await _supabase.from('usuarios').delete().eq('id', id); registrarLog('EXCLUIR_USER', `Removeu: ${n}`); carregarEquipe(); } }
+        
+        async function baixarBackup() { const Toast = Swal.mixin({toast: true, position: 'top-end', showConfirmButton: false, timer: 3000}); Toast.fire({icon: 'info', title: 'Gerando backup...'}); const { data: f } = await _supabase.from('frases').select('*'); const { data: u } = await _supabase.from('usuarios').select('*'); const { data: l } = await _supabase.from('logs').select('*'); const blob = new Blob([JSON.stringify({ data_exportacao: new Date().toISOString(), dados: { frases: f, usuarios: u, logs: l } }, null, 2)], { type: "application/json" }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `backup-${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); document.body.removeChild(a); registrarLog('BACKUP', 'Exportou dados'); Toast.fire({icon: 'success', title: 'Backup baixado!'}); }
+        
+        async function importarBackup(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    if(!backup.dados) throw new Error("Formato inválido");
+                    
+                    Swal.fire({title: 'Importando...', text: 'Aguarde um momento', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }});
+                    
+                    if(backup.dados.usuarios) await _supabase.from('usuarios').upsert(backup.dados.usuarios);
+                    if(backup.dados.frases) await _supabase.from('frases').upsert(backup.dados.frases);
+                    if(backup.dados.logs) await _supabase.from('logs').upsert(backup.dados.logs);
+                    
+                    registrarLog('RESTORE', 'Importou backup de dados');
+                    Swal.fire('Sucesso!', 'Dados restaurados com sucesso.', 'success').then(() => window.location.reload());
+                } catch (err) {
+                    Swal.fire('Erro', 'Falha ao importar arquivo: ' + err.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+    </script>
+</body>
+</html>

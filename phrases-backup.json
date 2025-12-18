@@ -1,0 +1,121 @@
+[
+  {
+    "text": "Olá, tudo bem? Esperamos que sim!\nSem problemas ainda não ter o ASO Admissional.\nQuando estiver com ele em mãos, é só nos enviar por aqui.\nObrigada!",
+    "category": "ASO SABESP",
+    "reason": "NÃO TEM ASO",
+    "usageCount": 1
+  },
+  {
+    "text": "Olá, tudo bem?        \nEsperamos que sim!  \nO documento anexado não corresponde ao ASO Exame médico Admissional, por gentileza envie o documento ASO.                \nObrigada!",
+    "category": "ASO",
+    "reason": "Incorreto"
+  },
+  {
+    "text": "Olá, tudo bem?\nEsperamos que sim!\nNesse campo é necessário inserir  o ASO, caso não possua, por gentileza não enviar outro tipo de comprovação, e clicar no botão \"\"Não possui\"\".\nObrigada!",
+    "category": "ASO",
+    "reason": "Incorreto",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem? Esperamos que sim!\nO documento enviado é um pedido de exame, e não o ASO (Atestado de Saúde Ocupacional). Por gentileza, envie o ASO assinado pelo médico, com CRM e data.\nObrigada!\"",
+    "category": "ASO",
+    "reason": "Pedido de Exame",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem? Esperamos que sim!\nO documento enviado é um Termo de Aceite, e não o ASO (Atestado de Saúde Ocupacional). Por gentileza, envie o ASO assinado pelo médico, com CRM e data.\nObrigada!",
+    "category": "ASO",
+    "reason": "Termo de Aceite",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem?\nEsperamos que sim! \nPrecisamos da informação com assinatura (manual ou digital) + nome do médico + CRM, seja do carimbo ou digitada, no seu caso não consta. Faça os ajustes.\nObrigada!",
+    "category": "ASO",
+    "reason": "CRM",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá! O documento enviado está com o carimbo do(a) profissional ilegível. Para prosseguirmos com a análise, é necessário que o carimbo esteja legível, contendo nome e CRM. Por favor, envie uma nova versão com essas informações visíveis. Obrigada!",
+    "category": "ASO",
+    "reason": "CRM Ilegível",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem? Esperamos que sim!\nPercebemos que o campo \"\"APTO\"\" não foi preenchido. Por gentileza, verifique com a clínica onde realizou o exame e reenvie o atestado com essa informação.\nObrigada!",
+    "category": "ASO",
+    "reason": "Apto",
+    "usageCount": 1
+  },
+  {
+    "text": "O exame de ASO anexado tem mais de 90 dias de emissão, por gentileza entrar em contato com o RH para verificar a possibilidade de aceite deste documento, ou  se é necessário realizar novo exame.                \nObrigada!",
+    "category": "ASO",
+    "reason": "Vencido",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem?\t\t\nEsperamos que sim!\t\t\nO campo XXXXXXXXX não está preenchido, por gentileza, verifique junto a clínica que realizou o exame e reenvie o atestado com a informação.\t\t\nObrigada!",
+    "category": "ASO",
+    "reason": "Campo",
+    "usageCount": 1
+  },
+  {
+    "text": "Olá, tudo bem?\nEsperamos que sim!\nO campo da data não está preenchido, por gentileza, verifique junto a clínica que realizou o exame e reenvie o atestado com a informação.\nObrigada!",
+    "category": "ASO",
+    "reason": "Data",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem?                \nEsperamos que sim!                \nNo comprovante não consta o número do cartão do SUS, por gentileza inserir outro comprovante que contenha além de seu nome completo, CPF, o número do cartão do SUS.\nObrigada!",
+    "category": "CARTÃO SUS - CNS",
+    "reason": "Sem Número/nome",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem ? Esperamos que sim! \nNesse cartão não contém o número do seu cartão do SUS , por gentileza apresentar outra comprovação podendo ser física/digital. Obrigada.",
+    "category": "CARTÃO SUS - CNS",
+    "reason": "Sem Número/nome",
+    "usageCount": 0
+  },
+  {
+    "text": "\"Olá, tudo bem ? Esperamos que sim! \nNesse cartão não tem o seu nome completo junto com nº do cartão, por gentileza apresentar outra comprovação podendo ser até mesmo digital, como por exemplo via aplicativo: Conecte Sus - meususdigital.saude.gov.br . Obrigada!\"",
+    "category": "CARTÃO SUS - CNS",
+    "reason": "Sem Número/nome",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem? Esperamos que sim!\nPara esse documento precisamos do cartão SUS, pode ser no modelo impresso ou digital, caso prefira pesquise via aplicativo: Conecte Sus - meususdigital.saude.gov.br . Obrigada!",
+    "category": "CARTÃO SUS - CNS",
+    "reason": "IncorretoCNS",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem ? Esperamos que sim!\nNós não aceitamos cartão rasurado, por gentileza apresentar outra comprovação podendo ser até mesmo digital, caso prefira pesquise via aplicativo: Conecte Sus meususdigital.saude.gov.br . Obrigada!",
+    "category": "CARTÃO SUS - CNS",
+    "reason": "Rasurado",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem? Esperamos que sim!\nO comprovante do Cartão SUS enviado contém dados apagados. Por favor, envie um comprovante em que todos os dados estejam legíveis, incluindo o número do CNS/Cartão SUS. Pode ser impresso ou digital, e você pode consultar através do app \"\"Meu SUS Digital\"\".\nObrigada!",
+    "category": "CARTÃO SUS - CNS",
+    "reason": "ApagadosCNS",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem? Esperamos que sim!\nPara esse documento, precisamos de um laudo médico atualizado (nos últimos 90 dias), devidamente datado e assinado.\nObrigada!",
+    "category": "LAUDO MÉDICO",
+    "reason": "Lvencido",
+    "usageCount": 0
+  },
+  {
+    "text": "Olá, tudo bem? Esperamos que sim! Por gentileza, se for para vaga PCD, o laudo médico deve conter informações sobre a sua condição de saúde, incluindo o código CID. Caso contrário, selecione a opção \"Não possuo\". Obrigada.",
+    "category": "LAUDO MÉDICO",
+    "reason": "Lincorreto",
+    "usageCount": 0
+  },
+  {
+    "text": "Gentileza anexar o laudo médico emitido pelo seu médico com informação relacionada a condição de saúde, com Código CID, assinatura e carimbo do médico responsável. Caso não seja o caso, selecione para este documento \"não possuo''. Obrigada!",
+    "category": "LAUDO MÉDICO",
+    "reason": "CID",
+    "usageCount": 0
+  }
+]
