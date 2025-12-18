@@ -1,7 +1,6 @@
-const SUPABASE_URL = 'https://urmwvabkikftsefztadb.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVybXd2YWJraWtmdHNlZnp0YWRiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNjU1NjQsImV4cCI6MjA4MDc0MTU2NH0.SXR6EG3fIE4Ya5ncUec9U2as1B7iykWZhZWN1V5b--E';
-const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+// No arquivo js/app.js da pasta DE TESTE:
+const SUPABASE_URL = 'https://keuzvhzbrinctwjurfdq.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtldXp2aHpicmluY3R3anVyZmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTU1MjYsImV4cCI6MjA4MTY3MTUyNn0.AqUZay4KzbTN8BoS_tQkHSmsk4KxNK9ysS-c9w-M3jE';
 let usuarioLogado = null, abaAtiva = 'biblioteca', chatAberto = false, debounceTimer;
 
 // --- INICIALIZAÇÃO ---
