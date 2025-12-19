@@ -1,6 +1,11 @@
-// No arquivo js/app.js da pasta DE TESTE:
+// --- CONFIGURAÇÃO DO SUPABASE (AMBIENTE DE TESTE) ---
 const SUPABASE_URL = 'https://keuzvhzbrinctwjurfdq.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtldXp2aHpicmluY3R3anVyZmRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTU1MjYsImV4cCI6MjA4MTY3MTUyNn0.AqUZay4KzbTN8BoS_tQkHSmsk4KxNK9ysS-c9w-M3jE';
+
+// A LINHA QUE FALTAVA PARA LIGAR O SISTEMA:
+const _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// --- VARIÁVEIS GLOBAIS ---
 let usuarioLogado = null, abaAtiva = 'biblioteca', chatAberto = false, debounceTimer;
 
 // --- INICIALIZAÇÃO ---
@@ -28,17 +33,17 @@ window.onload = function() {
 
 // --- AUTH & LOGIN ---
 async function fazerLogin() {
-    const u = document.getElementById('login-user').value; const p = document.getElementById('login-pass').value;
+    const u = document.getElementById('login-user').value; 
+    const p = document.getElementById('login-pass').value;
+    
     try { 
         const { data, error } = await _supabase.from('usuarios').select('*').eq('username', u).eq('senha', p);
+        
         if (error) return Swal.fire('Erro', error.message, 'error');
+        
         if (data && data.length) { 
             const usuario = data[0];
-            
-            // VALIDAÇÃO: Bloqueia acesso de inativos
-            if (usuario.ativo === false) {
-                return Swal.fire('Acesso Bloqueado', 'Esta conta foi inativada pela administração.', 'error');
-            }
+            if (usuario.ativo === false) return Swal.fire('Acesso Bloqueado', 'Esta conta foi inativada pela administração.', 'error');
 
             usuarioLogado = usuario; 
             localStorage.setItem('gupy_session', JSON.stringify(usuarioLogado)); 
@@ -49,8 +54,13 @@ async function fazerLogin() {
             } else {
                     entrarNoSistema();
             }
-        } else Swal.fire('Erro', 'Dados incorretos', 'warning');
-    } catch (e) { Swal.fire('Erro', 'Conexão falhou', 'error'); }
+        } else {
+            Swal.fire('Erro', 'Dados incorretos', 'warning');
+        }
+    } catch (e) { 
+        console.error(e);
+        Swal.fire('Erro', 'Conexão falhou', 'error'); 
+    }
 }
 
 function entrarNoSistema() {
@@ -65,7 +75,6 @@ function entrarNoSistema() {
         const roleLabel = document.getElementById('user-role-display'); 
         const adminMenu = document.getElementById('admin-menu-items');
 
-        // EXIBE NOME SE EXISTIR
         if(userNameDisplay && usuarioLogado) userNameDisplay.innerText = usuarioLogado.nome || usuarioLogado.username;
         if(userAvatar && usuarioLogado) userAvatar.innerText = (usuarioLogado.nome || usuarioLogado.username).charAt(0).toUpperCase();
 
@@ -88,56 +97,78 @@ function entrarNoSistema() {
 }
 
 async function atualizarSenhaPrimeiroAcesso() {
-    const s1 = document.getElementById('new-password').value; const s2 = document.getElementById('confirm-password').value;
+    const s1 = document.getElementById('new-password').value; 
+    const s2 = document.getElementById('confirm-password').value;
+    
     if(s1.length < 4 || s1 !== s2) return Swal.fire('Erro', 'Senhas inválidas', 'warning');
+    
     await _supabase.from('usuarios').update({senha: s1, primeiro_acesso: false}).eq('id', usuarioLogado.id);
-    usuarioLogado.primeiro_acesso = false; localStorage.setItem('gupy_session', JSON.stringify(usuarioLogado)); document.getElementById('first-access-modal').classList.add('hidden'); entrarNoSistema();
+    usuarioLogado.primeiro_acesso = false; 
+    localStorage.setItem('gupy_session', JSON.stringify(usuarioLogado)); 
+    document.getElementById('first-access-modal').classList.add('hidden'); 
+    entrarNoSistema();
 }
 
 function logout() { localStorage.removeItem('gupy_session'); location.reload(); }
-async function registrarLog(acao, detalhe) { if(usuarioLogado) await _supabase.from('logs').insert([{usuario: usuarioLogado.username, acao, detalhe}]); }
 
-// --- NAVEGAÇÃO & BUSCA INTELIGENTE ---
+// --- LOGS ---
+async function registrarLog(acao, detalhe) { 
+    if(usuarioLogado) {
+        await _supabase.from('logs').insert([{
+            usuario: usuarioLogado.username, 
+            acao, 
+            detalhe,
+            data_hora: new Date().toISOString()
+        }]); 
+    }
+}
+
+// --- NAVEGAÇÃO ---
 function navegar(pagina) {
     try {
         if (usuarioLogado.perfil !== 'admin' && (pagina === 'logs' || pagina === 'equipe' || pagina === 'dashboard')) pagina = 'biblioteca';
         abaAtiva = pagina;
         
-        // Controle de Visibilidade
         document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden')); 
         const targetView = document.getElementById(`view-${pagina}`);
         if(targetView) targetView.classList.remove('hidden');
         
-        // Controle da Barra de Filtros
         const filterBar = document.getElementById('filter-bar');
-        if(filterBar) filterBar.classList.toggle('hidden', pagina !== 'biblioteca');
+        if(filterBar) filterBar.classList.toggle('hidden', pagina !== 'biblioteca' && pagina !== 'equipe' && pagina !== 'logs');
         
-        // Botão Nova Frase: Só aparece na Biblioteca
-        const btnAddGlobal = document.getElementById('btn-add-global');
-        if(btnAddGlobal) { 
-            const deveAparecer = pagina === 'biblioteca';
-            btnAddGlobal.classList.toggle('hidden', !deveAparecer); 
-            btnAddGlobal.classList.toggle('flex', deveAparecer); 
+        const btnAddFrase = document.getElementById('btn-add-global');
+        const btnAddMember = document.getElementById('btn-add-member');
+        const btnRefresh = document.getElementById('btn-refresh-logs');
+        const cntLib = document.getElementById('contador-resultados');
+        const cntTeam = document.getElementById('contador-equipe');
+
+        if(btnAddFrase) btnAddFrase.classList.add('hidden');
+        if(btnAddMember) btnAddMember.classList.add('hidden');
+        if(btnRefresh) btnRefresh.classList.add('hidden');
+        if(cntLib) cntLib.classList.add('hidden');
+        if(cntTeam) cntTeam.classList.add('hidden');
+        
+        if (pagina === 'biblioteca') {
+            if(btnAddFrase) { btnAddFrase.classList.remove('hidden'); btnAddFrase.classList.add('flex'); }
+            if(cntLib) { cntLib.classList.remove('hidden'); }
+            carregarFrases();
+        } 
+        else if (pagina === 'equipe') {
+            if(btnAddMember) { btnAddMember.classList.remove('hidden'); btnAddMember.classList.add('flex'); }
+            if(cntTeam) { cntTeam.classList.remove('hidden'); }
+            carregarEquipe();
+        } 
+        else if (pagina === 'logs') {
+            if(btnRefresh) { btnRefresh.classList.remove('hidden'); btnRefresh.classList.add('flex'); }
+            carregarLogs();
+        } 
+        else if (pagina === 'dashboard') {
+            carregarDashboard();
         }
 
-        // --- BUSCA CONTEXTUAL ---
         const inputBusca = document.getElementById('global-search');
         inputBusca.value = '';
-        
-        const placeholders = {
-            'biblioteca': '🔎 Pesquisar frases...',
-            'equipe': '🔎 Buscar membro por nome...',
-            'logs': '🔎 Buscar por ação, usuário ou detalhe...',
-            'dashboard': 'Visualização de dados (sem busca)'
-        };
-        inputBusca.placeholder = placeholders[pagina] || 'Pesquisar...';
         inputBusca.disabled = (pagina === 'dashboard');
-
-        // Carrega Dados
-        if(pagina==='biblioteca') carregarFrases(); 
-        else if(pagina==='equipe') carregarEquipe(); 
-        else if(pagina==='logs') carregarLogs(); 
-        else if(pagina==='dashboard') carregarDashboard();
 
     } catch (e) { console.error("Erro na navegação", e); }
 }
@@ -146,11 +177,9 @@ function debounceBusca() {
     clearTimeout(debounceTimer); 
     debounceTimer = setTimeout(() => {
         const termo = document.getElementById('global-search').value.toLowerCase();
-        
         if (abaAtiva === 'biblioteca' && typeof aplicarFiltros === 'function') aplicarFiltros();
         if (abaAtiva === 'equipe' && typeof filtrarEquipe === 'function') filtrarEquipe(termo);
         if (abaAtiva === 'logs' && typeof filtrarLogs === 'function') filtrarLogs(termo);
-        
     }, 300); 
 }
 
